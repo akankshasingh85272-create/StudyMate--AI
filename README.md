@@ -1,25 +1,25 @@
-# StudyMate AI 📚🤖
+# StudyMate AI
 
-Ek AI-powered study platform jo students ko apne notes organize karne aur behtar tareeke se revise karne mein madad karta hai.
+An AI-powered study assistant that helps students organize, understand, and revise their study material more efficiently.
 
-## Kya Kya Features Hain
-- 🔐 Login/Signup (secure, JWT-based)
-- 📤 Apne notes/PDFs upload karke subject-wise organize karna
-- ✨ AI se automatically notes ka summary banwana
-- 📝 Notes se practice quiz automatically generate karna
-- 🔍 Smart (meaning-based) search — exact word match na ho tab bhi relevant notes mil jaate hain
+## Features
+-  User Authentication (Signup/Login with JWT)
+-  Upload and organize notes/PDFs by subject
+-  AI-powered Auto-Summarization of notes
+-  Automated Quiz Generation from notes
+-  Semantic (meaning-based) Search across notes
 
 ## Tech Stack
 - **Frontend:** React.js
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB
-- **AI/NLP:** Hugging Face ke pre-trained models
+- **AI/NLP:** Pre-trained Hugging Face models
 
-## Ye Project Kyun Banaya
-Students ke paas bahut sara study material hota hai, lekin usko organize karna aur revise karna time-consuming hota hai. StudyMate AI isko solve karta hai — ek jagah pe notes rakho, aur AI khud summary bana de, practice questions bana de, aur smart search se turant sahi cheez dhoondh de.
+## Why StudyMate AI?
+Most students struggle to organize and revise scattered study material efficiently. StudyMate AI addresses this by combining a simple note-management system with AI features that automatically summarize content, generate practice questions, and enable smarter, meaning-based search — saving time and improving retention.
 
 ## Status
-🚧 Abhi bhi bana raha hoon (Final Year Project ke liye)
+🚧 Actively under development (Final Year Project)
 
 ## Author
 Akanksha Singh
