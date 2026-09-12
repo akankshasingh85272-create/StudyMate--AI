@@ -13,6 +13,7 @@ function App() {
   const [subject, setSubject] = useState('');
   const [file, setFile] = useState(null);
   const [notes, setNotes] = useState([]);
+  const [summarizingId, setSummarizingId] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -81,6 +82,29 @@ function App() {
     } catch (error) {
       setMessage('Upload failed');
     }
+  };
+
+
+  const handleSummarize = async (noteId) => {
+    setSummarizingId(noteId);
+    const text = prompt('Paste the note text here to summarize (for testing):');
+    if (!text) {
+      setSummarizingId(null);
+      return;
+    }
+    try {
+      const response = await fetch(`http://localhost:5000/api/notes/summarize/${noteId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      const data = await response.json();
+      alert('Summary: ' + data.summary);
+      fetchNotes();
+    } catch (error) {
+      alert('Summarization failed');
+    }
+    setSummarizingId(null);
   };
 
   if (!user) {
@@ -163,7 +187,20 @@ function App() {
               <a href={`http://localhost:5000/uploads/${note.fileUrl}`} target="_blank" rel="noreferrer">
                 View File
               </a>
-            </li>
+              <br />
+                <button
+                onClick={() => handleSummarize(note._id)}
+                disabled={summarizingId === note._id}
+                style={{ marginTop: '5px', padding: '5px 10px' }}
+              >
+                {summarizingId === note._id ? 'Summarizing...' : 'Summarize'}
+              </button>
+              {note.summary && (
+                <p style={{ marginTop: '5px', fontStyle: 'italic' }}>
+                  Summary: {note.summary}
+                </p>
+              )}
+               </li>
           ))}
         </ul>
       )}
