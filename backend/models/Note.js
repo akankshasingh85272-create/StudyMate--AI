@@ -8,6 +8,15 @@ const noteSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+    extractedText: {
+    type: String,
+    default: ''
+  },
+
+    quiz: {
+    type: [String],
+    default: []
+  },
   uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 

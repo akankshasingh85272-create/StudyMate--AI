@@ -14,6 +14,7 @@ function App() {
   const [file, setFile] = useState(null);
   const [notes, setNotes] = useState([]);
   const [summarizingId, setSummarizingId] = useState(null);
+  const [quizzingId, setQuizzingId] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -84,28 +85,45 @@ function App() {
     }
   };
 
-
   const handleSummarize = async (noteId) => {
-    setSummarizingId(noteId);
-    const text = prompt('Paste the note text here to summarize (for testing):');
-    if (!text) {
-      setSummarizingId(null);
-      return;
-    }
-    try {
-      const response = await fetch(`http://localhost:5000/api/notes/summarize/${noteId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
-      const data = await response.json();
+  setSummarizingId(noteId);
+  try {
+    const response = await fetch(`http://localhost:5000/api/notes/summarize/${noteId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok) {
       alert('Summary: ' + data.summary);
-      fetchNotes();
-    } catch (error) {
-      alert('Summarization failed');
+    } else {
+      alert(data.message);
     }
-    setSummarizingId(null);
-  };
+    fetchNotes();
+  } catch (error) {
+    alert('Summarization failed');
+  }
+  setSummarizingId(null);
+};
+
+const handleGenerateQuiz = async (noteId) => {
+  setQuizzingId(noteId);
+  try {
+    const response = await fetch(`http://localhost:5000/api/notes/generate-quiz/${noteId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok) {
+      alert('Quiz Questions:\n' + data.quiz.join('\n'));
+    } else {
+      alert(data.message);
+    }
+    fetchNotes();
+  } catch (error) {
+    alert('Quiz generation failed');
+  }
+  setQuizzingId(null);
+};
 
   if (!user) {
     return (
@@ -182,25 +200,42 @@ function App() {
       ) : (
         <ul>
           {notes.map((note) => (
-            <li key={note._id} style={{ marginBottom: '10px' }}>
+            <li key={note._id} style={{ marginBottom: '20px' }}>
               <strong>{note.title}</strong> ({note.subject}) —{' '}
               <a href={`http://localhost:5000/uploads/${note.fileUrl}`} target="_blank" rel="noreferrer">
                 View File
               </a>
               <br />
-                <button
+              <button
                 onClick={() => handleSummarize(note._id)}
                 disabled={summarizingId === note._id}
-                style={{ marginTop: '5px', padding: '5px 10px' }}
+                style={{ marginTop: '5px', marginRight: '10px', padding: '5px 10px' }}
               >
                 {summarizingId === note._id ? 'Summarizing...' : 'Summarize'}
+              </button>
+              <button
+                onClick={() => handleGenerateQuiz(note._id)}
+                disabled={quizzingId === note._id}
+                style={{ marginTop: '5px', padding: '5px 10px' }}
+              >
+                {quizzingId === note._id ? 'Generating Quiz...' : 'Generate Quiz'}
               </button>
               {note.summary && (
                 <p style={{ marginTop: '5px', fontStyle: 'italic' }}>
                   Summary: {note.summary}
                 </p>
               )}
-               </li>
+              {note.quiz && note.quiz.length > 0 && (
+                <div style={{ marginTop: '5px' }}>
+                  <strong>Quiz Questions:</strong>
+                  <ul>
+                    {note.quiz.map((q, index) => (
+                      <li key={index}>{q}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </li>
           ))}
         </ul>
       )}
