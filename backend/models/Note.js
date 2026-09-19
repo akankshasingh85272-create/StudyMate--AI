@@ -17,6 +17,10 @@ const noteSchema = new mongoose.Schema({
     type: [String],
     default: []
   },
+    embedding: {
+    type: [Number],
+    default: []
+  },
   uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 

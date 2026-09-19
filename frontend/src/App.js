@@ -16,6 +16,14 @@ function App() {
   const [summarizingId, setSummarizingId] = useState(null);
   const [quizzingId, setQuizzingId] = useState(null);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [asking, setAsking] = useState(false);
+
   useEffect(() => {
     if (user) {
       fetchNotes();
@@ -86,43 +94,82 @@ function App() {
   };
 
   const handleSummarize = async (noteId) => {
-  setSummarizingId(noteId);
-  try {
-    const response = await fetch(`http://localhost:5000/api/notes/summarize/${noteId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const data = await response.json();
-    if (response.ok) {
-      alert('Summary: ' + data.summary);
-    } else {
-      alert(data.message);
+    setSummarizingId(noteId);
+    try {
+      const response = await fetch(`http://localhost:5000/api/notes/summarize/${noteId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert('Summary: ' + data.summary);
+      } else {
+        alert(data.message);
+      }
+      fetchNotes();
+    } catch (error) {
+      alert('Summarization failed');
     }
-    fetchNotes();
-  } catch (error) {
-    alert('Summarization failed');
-  }
-  setSummarizingId(null);
-};
+    setSummarizingId(null);
+  };
 
-const handleGenerateQuiz = async (noteId) => {
-  setQuizzingId(noteId);
+  const handleGenerateQuiz = async (noteId) => {
+    setQuizzingId(noteId);
+    try {
+      const response = await fetch(`http://localhost:5000/api/notes/generate-quiz/${noteId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert('Quiz Questions:\n' + data.quiz.join('\n'));
+      } else {
+        alert(data.message);
+      }
+      fetchNotes();
+    } catch (error) {
+      alert('Quiz generation failed');
+    }
+    setQuizzingId(null);
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setSearching(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/notes/search/${user.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: searchQuery }),
+      });
+      const data = await response.json();
+      setSearchResults(data.results || []);
+    } catch (error) {
+      alert('Search failed');
+    }
+    setSearching(false);
+  };
+
+  const handleAsk = async (e) => {
+  e.preventDefault();
+  setAsking(true);
+  setAnswer('');
   try {
-    const response = await fetch(`http://localhost:5000/api/notes/generate-quiz/${noteId}`, {
+    const response = await fetch(`http://localhost:5000/api/notes/ask/${user.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
     });
     const data = await response.json();
     if (response.ok) {
-      alert('Quiz Questions:\n' + data.quiz.join('\n'));
+      setAnswer(`${data.answer}\n\n(Source: ${data.source})`);
     } else {
-      alert(data.message);
+      setAnswer(data.message);
     }
-    fetchNotes();
   } catch (error) {
-    alert('Quiz generation failed');
+    setAnswer('Something went wrong');
   }
-  setQuizzingId(null);
+  setAsking(false);
 };
 
   if (!user) {
@@ -169,7 +216,53 @@ const handleGenerateQuiz = async (noteId) => {
     <div style={{ maxWidth: '600px', margin: '50px auto', fontFamily: 'Arial' }}>
       <h2>Welcome, {user.name}!</h2>
 
-      <h3>Upload a Note</h3>
+      <h3>Smart Search</h3>
+      <form onSubmit={handleSearch}>
+        <input
+          type="text"
+          placeholder="Search your notes by meaning..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ padding: '10px', width: '70%', marginRight: '10px' }}
+        />
+        <button type="submit" disabled={searching} style={{ padding: '10px 15px' }}>
+          {searching ? 'Searching...' : 'Search'}
+        </button>
+      </form>
+
+      {searchResults.length > 0 && (
+        <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
+          <strong>Search Results:</strong>
+          <ul>
+            {searchResults.map((r) => (
+              <li key={r._id}>
+                {r.title} ({r.subject}) — Match: {r.similarity}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <h3 style={{ marginTop: '30px' }}>Ask Your Notes (RAG)</h3>
+<form onSubmit={handleAsk}>
+  <input
+    type="text"
+    placeholder="Ask a question based on your notes..."
+    value={question}
+    onChange={(e) => setQuestion(e.target.value)}
+    style={{ padding: '10px', width: '70%', marginRight: '10px' }}
+  />
+  <button type="submit" disabled={asking} style={{ padding: '10px 15px' }}>
+    {asking ? 'Thinking...' : 'Ask'}
+  </button>
+</form>
+{answer && (
+  <p style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc', whiteSpace: 'pre-wrap' }}>
+    {answer}
+  </p>
+)}
+
+      <h3 style={{ marginTop: '30px' }}>Upload a Note</h3>
       <form onSubmit={handleUpload}>
         <input
           type="text"
