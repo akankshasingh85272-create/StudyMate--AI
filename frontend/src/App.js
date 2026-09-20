@@ -151,187 +151,246 @@ function App() {
   };
 
   const handleAsk = async (e) => {
-  e.preventDefault();
-  setAsking(true);
-  setAnswer('');
-  try {
-    const response = await fetch(`http://localhost:5000/api/notes/ask/${user.id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question }),
-    });
-    const data = await response.json();
-    if (response.ok) {
-      setAnswer(`${data.answer}\n\n(Source: ${data.source})`);
-    } else {
-      setAnswer(data.message);
+    e.preventDefault();
+    setAsking(true);
+    setAnswer('');
+    try {
+      const response = await fetch(`http://localhost:5000/api/notes/ask/${user.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setAnswer(`${data.answer}\n\n(Source: ${data.source})`);
+      } else {
+        setAnswer(data.message);
+      }
+    } catch (error) {
+      setAnswer('Something went wrong');
     }
-  } catch (error) {
-    setAnswer('Something went wrong');
-  }
-  setAsking(false);
-};
+    setAsking(false);
+  };
 
+  // LOGIN / SIGNUP PAGE
   if (!user) {
     return (
-      <div style={{ maxWidth: '400px', margin: '50px auto', fontFamily: 'Arial' }}>
-        <h2>StudyMate AI - {isLogin ? 'Login' : 'Signup'}</h2>
-        <form onSubmit={handleSubmit}>
-          {!isLogin && (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800">📚 StudyMate AI</h1>
+            <p className="text-gray-500 mt-2">
+              {isLogin ? 'Welcome back!' : 'Create your account'}
+            </p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            )}
             <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px' }}
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-          )}
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px' }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px' }}
-          />
-          <button type="submit" style={{ padding: '10px 20px' }}>
-            {isLogin ? 'Login' : 'Signup'}
-          </button>
-        </form>
-        {message && <p>{message}</p>}
-        <p onClick={() => setIsLogin(!isLogin)} style={{ color: 'blue', cursor: 'pointer' }}>
-          {isLogin ? 'New user? Signup here' : 'Already have account? Login here'}
-        </p>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition"
+            >
+              {isLogin ? 'Login' : 'Sign Up'}
+            </button>
+          </form>
+          {message && <p className="text-center text-sm text-red-500 mt-4">{message}</p>}
+          <p
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-center text-indigo-600 mt-6 cursor-pointer hover:underline text-sm"
+          >
+            {isLogin ? "New user? Sign up here" : 'Already have an account? Login here'}
+          </p>
+        </div>
       </div>
     );
   }
 
+  // DASHBOARD
   return (
-    <div style={{ maxWidth: '600px', margin: '50px auto', fontFamily: 'Arial' }}>
-      <h2>Welcome, {user.name}!</h2>
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold text-indigo-600">📚 StudyMate AI</h1>
+        <span className="text-gray-600">Welcome, {user.name}!</span>
+      </nav>
 
-      <h3>Smart Search</h3>
-      <form onSubmit={handleSearch}>
-        <input
-          type="text"
-          placeholder="Search your notes by meaning..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ padding: '10px', width: '70%', marginRight: '10px' }}
-        />
-        <button type="submit" disabled={searching} style={{ padding: '10px 15px' }}>
-          {searching ? 'Searching...' : 'Search'}
-        </button>
-      </form>
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
 
-      {searchResults.length > 0 && (
-        <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc' }}>
-          <strong>Search Results:</strong>
-          <ul>
-            {searchResults.map((r) => (
-              <li key={r._id}>
-                {r.title} ({r.subject}) — Match: {r.similarity}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <h3 style={{ marginTop: '30px' }}>Ask Your Notes (RAG)</h3>
-<form onSubmit={handleAsk}>
-  <input
-    type="text"
-    placeholder="Ask a question based on your notes..."
-    value={question}
-    onChange={(e) => setQuestion(e.target.value)}
-    style={{ padding: '10px', width: '70%', marginRight: '10px' }}
-  />
-  <button type="submit" disabled={asking} style={{ padding: '10px 15px' }}>
-    {asking ? 'Thinking...' : 'Ask'}
-  </button>
-</form>
-{answer && (
-  <p style={{ marginTop: '10px', padding: '10px', border: '1px solid #ccc', whiteSpace: 'pre-wrap' }}>
-    {answer}
-  </p>
-)}
-
-      <h3 style={{ marginTop: '30px' }}>Upload a Note</h3>
-      <form onSubmit={handleUpload}>
-        <input
-          type="text"
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px' }}
-        />
-        <input
-          type="text"
-          placeholder="Subject"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px' }}
-        />
-        <input
-          type="file"
-          onChange={(e) => setFile(e.target.files[0])}
-          style={{ display: 'block', marginBottom: '10px' }}
-        />
-        <button type="submit" style={{ padding: '10px 20px' }}>Upload</button>
-      </form>
-      {message && <p>{message}</p>}
-
-      <h3 style={{ marginTop: '30px' }}>Your Notes</h3>
-      {notes.length === 0 ? (
-        <p>No notes uploaded yet.</p>
-      ) : (
-        <ul>
-          {notes.map((note) => (
-            <li key={note._id} style={{ marginBottom: '20px' }}>
-              <strong>{note.title}</strong> ({note.subject}) —{' '}
-              <a href={`http://localhost:5000/uploads/${note.fileUrl}`} target="_blank" rel="noreferrer">
-                View File
-              </a>
-              <br />
-              <button
-                onClick={() => handleSummarize(note._id)}
-                disabled={summarizingId === note._id}
-                style={{ marginTop: '5px', marginRight: '10px', padding: '5px 10px' }}
-              >
-                {summarizingId === note._id ? 'Summarizing...' : 'Summarize'}
-              </button>
-              <button
-                onClick={() => handleGenerateQuiz(note._id)}
-                disabled={quizzingId === note._id}
-                style={{ marginTop: '5px', padding: '5px 10px' }}
-              >
-                {quizzingId === note._id ? 'Generating Quiz...' : 'Generate Quiz'}
-              </button>
-              {note.summary && (
-                <p style={{ marginTop: '5px', fontStyle: 'italic' }}>
-                  Summary: {note.summary}
-                </p>
-              )}
-              {note.quiz && note.quiz.length > 0 && (
-                <div style={{ marginTop: '5px' }}>
-                  <strong>Quiz Questions:</strong>
-                  <ul>
-                    {note.quiz.map((q, index) => (
-                      <li key={index}>{q}</li>
-                    ))}
-                  </ul>
+        {/* Smart Search */}
+        <div className="bg-white rounded-xl shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">🔍 Smart Search</h2>
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Search your notes by meaning..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              type="submit"
+              disabled={searching}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium transition disabled:opacity-50"
+            >
+              {searching ? 'Searching...' : 'Search'}
+            </button>
+          </form>
+          {searchResults.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {searchResults.map((r) => (
+                <div key={r._id} className="bg-gray-50 rounded-lg p-3 flex justify-between text-sm">
+                  <span className="font-medium text-gray-700">{r.title} ({r.subject})</span>
+                  <span className="text-indigo-600">Match: {r.similarity}</span>
                 </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* RAG - Ask Questions */}
+        <div className="bg-white rounded-xl shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">🤖 Ask Your Notes (RAG)</h2>
+          <form onSubmit={handleAsk} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Ask a question based on your notes..."
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              type="submit"
+              disabled={asking}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg font-medium transition disabled:opacity-50"
+            >
+              {asking ? 'Thinking...' : 'Ask'}
+            </button>
+          </form>
+          {answer && (
+            <p className="mt-4 bg-purple-50 border border-purple-200 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap">
+              {answer}
+            </p>
+          )}
+        </div>
+
+        {/* Upload */}
+        <div className="bg-white rounded-xl shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">📤 Upload a Note</h2>
+          <form onSubmit={handleUpload} className="space-y-3">
+            <input
+              type="text"
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <input
+              type="text"
+              placeholder="Subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <input
+              type="file"
+              onChange={(e) => setFile(e.target.files[0])}
+              className="w-full text-sm text-gray-600"
+            />
+            <button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium transition"
+            >
+              Upload
+            </button>
+          </form>
+          {message && <p className="text-sm text-gray-600 mt-3">{message}</p>}
+        </div>
+
+        {/* Notes List */}
+        <div className="bg-white rounded-xl shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">📝 Your Notes</h2>
+          {notes.length === 0 ? (
+            <p className="text-gray-400 text-sm">No notes uploaded yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {notes.map((note) => (
+                <div key={note._id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-semibold text-gray-800">{note.title}</h3>
+                      <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
+                        {note.subject}
+                      </span>
+                    </div>
+                    <a>
+                      href={`http://localhost:5000/uploads/${note.fileUrl}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-indigo-600 text-sm hover:underline"
+                    
+                      View File
+                    </a>
+                  </div>
+
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      onClick={() => handleSummarize(note._id)}
+                      disabled={summarizingId === note._id}
+                      className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                    >
+                      {summarizingId === note._id ? 'Summarizing...' : '✨ Summarize'}
+                    </button>
+                    <button
+                      onClick={() => handleGenerateQuiz(note._id)}
+                      disabled={quizzingId === note._id}
+                      className="text-sm bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                    >
+                      {quizzingId === note._id ? 'Generating...' : '📝 Generate Quiz'}
+                    </button>
+                  </div>
+
+                  {note.summary && (
+                    <p className="mt-3 text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg">
+                      {note.summary}
+                    </p>
+                  )}
+
+                  {note.quiz && note.quiz.length > 0 && (
+                    <div className="mt-3 bg-yellow-50 p-3 rounded-lg">
+                      <p className="font-medium text-sm text-gray-700 mb-1">Quiz Questions:</p>
+                      <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
+                        {note.quiz.map((q, index) => (
+                          <li key={index}>{q}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
