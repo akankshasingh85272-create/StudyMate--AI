@@ -281,5 +281,39 @@ router.post('/ask/:userId', async (req, res) => {
     res.status(500).json({ message: 'Question answering failed', error: error.message });
   }
 });
+// GET RELATED YOUTUBE VIDEOS
+router.get('/youtube/:noteId', async (req, res) => {
+  try {
+    const note = await Note.findById(req.params.noteId);
+    if (!note) {
+      return res.status(404).json({ message: 'Note not found' });
+    }
 
+const searchQuery = note.extractedText 
+  ? note.extractedText.substring(0, 100) 
+  : `${note.title} ${note.subject}`;
+
+  
+    const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+      params: {
+        part: 'snippet',
+        q: searchQuery,
+        type: 'video',
+        maxResults: 5,
+        key: process.env.YOUTUBE_API_KEY
+      }
+    });
+
+    const videos = response.data.items.map(item => ({
+      videoId: item.id.videoId,
+      title: item.snippet.title,
+      thumbnail: item.snippet.thumbnails.medium.url
+    }));
+
+    res.status(200).json({ videos });
+  } catch (error) {
+    console.log('YOUTUBE ERROR DETAILS:', error.response ? error.response.data : error.message);
+    res.status(500).json({ message: 'Failed to fetch videos', error: error.message });
+  }
+});
 module.exports = router;

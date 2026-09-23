@@ -15,6 +15,9 @@ function App() {
   const [notes, setNotes] = useState([]);
   const [summarizingId, setSummarizingId] = useState(null);
   const [quizzingId, setQuizzingId] = useState(null);
+  const [videosNoteId, setVideosNoteId] = useState(null);
+const [videos, setVideos] = useState([]);
+const [loadingVideos, setLoadingVideos] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -171,6 +174,20 @@ function App() {
     }
     setAsking(false);
   };
+
+  const handleGetVideos = async (noteId) => {
+  setLoadingVideos(true);
+  setVideosNoteId(noteId);
+  setVideos([]);
+  try {
+    const response = await fetch(`http://localhost:5000/api/notes/youtube/${noteId}`);
+    const data = await response.json();
+    setVideos(data.videos || []);
+  } catch (error) {
+    alert('Failed to fetch videos');
+  }
+  setLoadingVideos(false);
+};
 
   // LOGIN / SIGNUP PAGE
   if (!user) {
@@ -353,6 +370,7 @@ function App() {
                   </div>
 
                   <div className="flex gap-2 mt-3">
+                 
                     <button
                       onClick={() => handleSummarize(note._id)}
                       disabled={summarizingId === note._id}
@@ -367,6 +385,14 @@ function App() {
                     >
                       {quizzingId === note._id ? 'Generating...' : '📝 Generate Quiz'}
                     </button>
+
+                       <button
+                 onClick={() => handleGetVideos(note._id)}
+                 disabled={loadingVideos && videosNoteId === note._id}
+                className="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                   >
+                {loadingVideos && videosNoteId === note._id ? 'Loading...' : '🎥 Related Videos'}
+                  </button>
                   </div>
 
                   {note.summary && (
@@ -385,6 +411,23 @@ function App() {
                       </ul>
                     </div>
                   )}
+                  {videosNoteId === note._id && videos.length > 0 && (
+                <div className="mt-3 grid grid-cols-2 gap-3">
+               {videos.map((video) => (
+                <a
+                 key={video.videoId}
+                href={`https://www.youtube.com/watch?v=${video.videoId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="block"
+                >
+                <img src={video.thumbnail} alt={video.title} className="rounded-lg w-full" />
+                 <p className="text-xs text-gray-700 mt-1 line-clamp-2">{video.title}</p>
+                 </a>
+                 ))}
+               </div>
+                 )}
+                  
                 </div>
               ))}
             </div>
