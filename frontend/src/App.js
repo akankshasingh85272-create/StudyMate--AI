@@ -356,11 +356,11 @@ function App() {
                         {note.subject}
                       </span>
                     </div>
-                        <a>
+                        <a
                       href={`${API_URL}/uploads/${note.fileUrl}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-indigo-600 text-sm hover:underline"
+                      className="text-indigo-600 text-sm hover:underline">
                       View File
                     </a>
                   </div>
@@ -409,12 +409,12 @@ function App() {
                   {videosNoteId === note._id && videos.length > 0 && (
                     <div className="mt-3 grid grid-cols-2 gap-3">
                       {videos.map((video) => (
-                         <a>
+                         <a
                           key={video.videoId}
                           href={`https://www.youtube.com/watch?v=${video.videoId}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="block"
+                          className="block">
                           <img src={video.thumbnail} alt={video.title} className="rounded-lg w-full" />
                           <p className="text-xs text-gray-700 mt-1 line-clamp-2">{video.title}</p>
                         </a>
