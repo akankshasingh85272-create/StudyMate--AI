@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
+  const API_URL = 'https://studymate-ai-q23t.onrender.com';
   const [isLogin, setIsLogin] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -16,8 +17,8 @@ function App() {
   const [summarizingId, setSummarizingId] = useState(null);
   const [quizzingId, setQuizzingId] = useState(null);
   const [videosNoteId, setVideosNoteId] = useState(null);
-const [videos, setVideos] = useState([]);
-const [loadingVideos, setLoadingVideos] = useState(false);
+  const [videos, setVideos] = useState([]);
+  const [loadingVideos, setLoadingVideos] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -36,7 +37,7 @@ const [loadingVideos, setLoadingVideos] = useState(false);
 
   const fetchNotes = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/notes/my-notes/${user.id}`);
+      const response = await fetch(`${API_URL}/api/notes/my-notes/${user.id}`);
       const data = await response.json();
       setNotes(data);
     } catch (error) {
@@ -47,8 +48,8 @@ const [loadingVideos, setLoadingVideos] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = isLogin
-      ? 'http://localhost:5000/api/auth/login'
-      : 'http://localhost:5000/api/auth/signup';
+      ? `${API_URL}/api/auth/login`
+      : `${API_URL}/api/auth/signup`;
 
     const body = isLogin
       ? { email, password }
@@ -81,7 +82,7 @@ const [loadingVideos, setLoadingVideos] = useState(false);
     formData.append('userId', user.id);
 
     try {
-      const response = await fetch('http://localhost:5000/api/notes/upload', {
+      const response = await fetch(`${API_URL}/api/notes/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -99,7 +100,7 @@ const [loadingVideos, setLoadingVideos] = useState(false);
   const handleSummarize = async (noteId) => {
     setSummarizingId(noteId);
     try {
-      const response = await fetch(`http://localhost:5000/api/notes/summarize/${noteId}`, {
+      const response = await fetch(`${API_URL}/api/notes/summarize/${noteId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -119,7 +120,7 @@ const [loadingVideos, setLoadingVideos] = useState(false);
   const handleGenerateQuiz = async (noteId) => {
     setQuizzingId(noteId);
     try {
-      const response = await fetch(`http://localhost:5000/api/notes/generate-quiz/${noteId}`, {
+      const response = await fetch(`${API_URL}/api/notes/generate-quiz/${noteId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -140,7 +141,7 @@ const [loadingVideos, setLoadingVideos] = useState(false);
     e.preventDefault();
     setSearching(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/notes/search/${user.id}`, {
+      const response = await fetch(`${API_URL}/api/notes/search/${user.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: searchQuery }),
@@ -158,7 +159,7 @@ const [loadingVideos, setLoadingVideos] = useState(false);
     setAsking(true);
     setAnswer('');
     try {
-      const response = await fetch(`http://localhost:5000/api/notes/ask/${user.id}`, {
+      const response = await fetch(`${API_URL}/api/notes/ask/${user.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question }),
@@ -176,18 +177,18 @@ const [loadingVideos, setLoadingVideos] = useState(false);
   };
 
   const handleGetVideos = async (noteId) => {
-  setLoadingVideos(true);
-  setVideosNoteId(noteId);
-  setVideos([]);
-  try {
-    const response = await fetch(`http://localhost:5000/api/notes/youtube/${noteId}`);
-    const data = await response.json();
-    setVideos(data.videos || []);
-  } catch (error) {
-    alert('Failed to fetch videos');
-  }
-  setLoadingVideos(false);
-};
+    setLoadingVideos(true);
+    setVideosNoteId(noteId);
+    setVideos([]);
+    try {
+      const response = await fetch(`${API_URL}/api/notes/youtube/${noteId}`);
+      const data = await response.json();
+      setVideos(data.videos || []);
+    } catch (error) {
+      alert('Failed to fetch videos');
+    }
+    setLoadingVideos(false);
+  };
 
   // LOGIN / SIGNUP PAGE
   if (!user) {
@@ -253,7 +254,6 @@ const [loadingVideos, setLoadingVideos] = useState(false);
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
 
-        {/* Smart Search */}
         <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">🔍 Smart Search</h2>
           <form onSubmit={handleSearch} className="flex gap-2">
@@ -284,7 +284,6 @@ const [loadingVideos, setLoadingVideos] = useState(false);
           )}
         </div>
 
-        {/* RAG - Ask Questions */}
         <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">🤖 Ask Your Notes (RAG)</h2>
           <form onSubmit={handleAsk} className="flex gap-2">
@@ -310,7 +309,6 @@ const [loadingVideos, setLoadingVideos] = useState(false);
           )}
         </div>
 
-        {/* Upload */}
         <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">📤 Upload a Note</h2>
           <form onSubmit={handleUpload} className="space-y-3">
@@ -343,7 +341,6 @@ const [loadingVideos, setLoadingVideos] = useState(false);
           {message && <p className="text-sm text-gray-600 mt-3">{message}</p>}
         </div>
 
-        {/* Notes List */}
         <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">📝 Your Notes</h2>
           {notes.length === 0 ? (
@@ -359,19 +356,17 @@ const [loadingVideos, setLoadingVideos] = useState(false);
                         {note.subject}
                       </span>
                     </div>
-                    <a>
-                      href={`http://localhost:5000/uploads/${note.fileUrl}`}
+                        <a>
+                      href={`${API_URL}/uploads/${note.fileUrl}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-indigo-600 text-sm hover:underline"
-                    
                       View File
                     </a>
                   </div>
 
                   <div className="flex gap-2 mt-3">
-                 
-                    <button
+                      <button
                       onClick={() => handleSummarize(note._id)}
                       disabled={summarizingId === note._id}
                       className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
@@ -385,14 +380,13 @@ const [loadingVideos, setLoadingVideos] = useState(false);
                     >
                       {quizzingId === note._id ? 'Generating...' : '📝 Generate Quiz'}
                     </button>
-
-                       <button
-                 onClick={() => handleGetVideos(note._id)}
-                 disabled={loadingVideos && videosNoteId === note._id}
-                className="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
-                   >
-                {loadingVideos && videosNoteId === note._id ? 'Loading...' : '🎥 Related Videos'}
-                  </button>
+                    <button
+                      onClick={() => handleGetVideos(note._id)}
+                      disabled={loadingVideos && videosNoteId === note._id}
+                      className="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                    >
+                      {loadingVideos && videosNoteId === note._id ? 'Loading...' : '🎥 Related Videos'}
+                    </button>
                   </div>
 
                   {note.summary && (
@@ -411,23 +405,22 @@ const [loadingVideos, setLoadingVideos] = useState(false);
                       </ul>
                     </div>
                   )}
+
                   {videosNoteId === note._id && videos.length > 0 && (
-                <div className="mt-3 grid grid-cols-2 gap-3">
-               {videos.map((video) => (
-                <a
-                 key={video.videoId}
-                href={`https://www.youtube.com/watch?v=${video.videoId}`}
-                target="_blank"
-                rel="noreferrer"
-                className="block"
-                >
-                <img src={video.thumbnail} alt={video.title} className="rounded-lg w-full" />
-                 <p className="text-xs text-gray-700 mt-1 line-clamp-2">{video.title}</p>
-                 </a>
-                 ))}
-               </div>
-                 )}
-                  
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+                      {videos.map((video) => (
+                         <a>
+                          key={video.videoId}
+                          href={`https://www.youtube.com/watch?v=${video.videoId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block"
+                          <img src={video.thumbnail} alt={video.title} className="rounded-lg w-full" />
+                          <p className="text-xs text-gray-700 mt-1 line-clamp-2">{video.title}</p>
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
